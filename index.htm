@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Flashcards: Lyric Study</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        .perspective { perspective: 1000px; }
+        
+        .card-inner {
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+        
+        .card-flipped { transform: rotateY(180px); }
+        
+        .card-front, .card-back {
+            backface-visibility: hidden;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+            padding: 1.5rem;
+        }
+        
+        .card-back { 
+            transform: rotateY(180px);
+            overflow-y: auto;
+        }
+        
+        @media (max-height: 700px) {
+            .perspective { height: 65vh; }
+            h1 { font-size: 1.25rem; }
+        }
+
+        .speaker-btn {
+            padding: 12px;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+        
+        .speaker-btn:active {
+            background-color: rgba(79, 70, 229, 0.1);
+        }
+
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.7rem center;
+            background-size: 1em;
+        }
+    </style>
+</head>
+<body class="p-4">
+
+    <div class="w-full max-w-sm mx-auto flex flex-col">
+        <!-- Music Selector -->
+        <div class="mb-4">
+            <label class="text-[10px] text-white/60 uppercase font-bold tracking-widest ml-1 mb-1 block">Selecionar Música</label>
+            <select id="music-selector" onchange="changeMusic()" class="w-full bg-white/20 border border-white/30 text-white text-sm rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-white/50 transition-all font-medium">
+                <option value="killing" class="text-gray-800">Killing Me Softly - Roberta Flack</option>
+                <option value="standup" class="text-gray-800">Stand Up - Cynthia Erivo</option>
+            </select>
+        </div>
+
+        <!-- Header -->
+        <div class="text-center mb-4 text-white">
+            <h1 id="music-title" class="text-xl font-bold italic opacity-90">"Killing Me Softly"</h1>
+        </div>
+
+        <!-- Stats -->
+        <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-4 mb-6 flex justify-between text-white text-xs border border-white/20">
+            <div class="text-center">
+                <span class="block opacity-60">Total</span>
+                <span id="total-count" class="font-bold text-lg">0</span>
+            </div>
+            <div class="text-center border-x border-white/10 px-6">
+                <span class="block opacity-60">Vistas</span>
+                <span id="seen-count" class="font-bold text-lg">0</span>
+            </div>
+            <div class="text-center">
+                <span class="block opacity-60">Domínio</span>
+                <span id="mastery" class="font-bold text-lg">0%</span>
+            </div>
+        </div>
+
+        <!-- Flashcard Container -->
+        <div class="perspective h-[380px] w-full mb-8">
+            <div id="flashcard" class="card-inner relative w-full h-full">
+                
+                <!-- Frente -->
+                <div class="card-front bg-white border-b-8 border-indigo-500 cursor-pointer" onclick="handleCardClick(event)">
+                    <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-[0.2em] mb-4">Inglês</span>
+                    <div class="flex flex-col items-center gap-4">
+                        <h2 id="word-en-front" class="text-4xl font-black text-gray-800 tracking-tight text-center">...</h2>
+                        <button onclick="speak(event)" class="speaker-btn text-indigo-400" aria-label="Ouvir">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                        </button>
+                    </div>
+                    <p class="text-gray-300 mt-auto text-xs animate-pulse">Toque para girar</p>
+                </div>
+
+                <!-- Verso -->
+                <div class="card-back bg-indigo-50 border-b-8 border-green-500">
+                    <div class="flex items-center gap-2 mb-4 opacity-50">
+                        <span id="word-en-back" class="text-sm font-bold text-indigo-900 uppercase">...</span>
+                        <button onclick="speak(event)" class="p-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                        </button>
+                    </div>
+                    
+                    <div id="translation-container" class="flex-1 flex flex-col items-center justify-center w-full">
+                        <button id="reveal-btn" onclick="revealTranslation()" class="bg-indigo-600 text-white px-8 py-4 rounded-2xl text-sm font-black shadow-lg shadow-indigo-200 active:scale-95 transition-transform">
+                            VER TRADUÇÃO
+                        </button>
+                        <div id="translation-data" class="hidden text-center">
+                            <h2 id="word-pt" class="text-3xl font-black text-gray-800 italic mb-2">...</h2>
+                            <p id="other-meanings" class="text-indigo-600 text-xs font-medium px-4 leading-relaxed"></p>
+                        </div>
+                    </div>
+
+                    <div class="w-full mt-6 pt-4 border-t border-indigo-100">
+                        <p id="context" class="text-gray-400 text-sm italic leading-snug"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div id="controls" class="space-y-4 opacity-0 transition-opacity duration-300 pointer-events-none pb-8">
+            <div class="grid grid-cols-3 gap-3">
+                <button onclick="rate('hard')" class="bg-white/10 border border-red-400/50 text-red-100 py-4 rounded-2xl font-bold active:bg-red-500/20 transition-colors text-sm">
+                    Difícil
+                </button>
+                <button onclick="rate('medium')" class="bg-white/10 border border-yellow-400/50 text-yellow-100 py-4 rounded-2xl font-bold active:bg-yellow-500/20 transition-colors text-sm">
+                    Médio
+                </button>
+                <button onclick="rate('easy')" class="bg-white/10 border border-green-400/50 text-green-100 py-4 rounded-2xl font-bold active:bg-green-500/20 transition-colors text-sm">
+                    Fácil
+                </button>
+            </div>
+            <button onclick="nextCard()" class="w-full bg-white text-indigo-700 py-4 rounded-2xl font-black shadow-xl active:scale-[0.98] transition-transform">
+                PRÓXIMA PALAVRA
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const songData = {
+            killing: {
+                title: "Killing Me Softly",
+                words: [
+                    { en: "Strumming", pt: "Dedilhando", others: "tocar (violão), vibrar cordas", context: "Strumming my pain with his fingers" },
+                    { en: "Pain", pt: "Dor", others: "sofrimento, mágoa, aflição", context: "Strumming my pain" },
+                    { en: "Fingers", pt: "Dedos", others: "pontas dos dedos, manusear", context: "With his fingers" },
+                    { en: "Singing", pt: "Cantando", others: "entoando, gorjeando", context: "Singing my life with his words" },
+                    { en: "Words", pt: "Palavras", others: "termos, vocábulos, promessas", context: "With his words" },
+                    { en: "Killing", pt: "Matando", others: "assassinando, destruindo", context: "Killing me softly" },
+                    { en: "Softly", pt: "Suavemente", others: "docemente, levemente, baixo", context: "Killing me softly" },
+                    { en: "Telling", pt: "Contando", others: "dizendo, narrando, relatando", context: "Telling my whole life" },
+                    { en: "Whole", pt: "Inteira", others: "toda, completa, integral", context: "Telling my whole life" },
+                    { en: "Heard", pt: "Ouvi", others: "escutou, ficou sabendo", context: "I heard he sang a good song" },
+                    { en: "Style", pt: "Estilo", others: "maneira, modo, elegância", context: "I heard he had a style" },
+                    { en: "Listen", pt: "Ouvir", others: "escutar, prestar atenção", context: "Listen for a while" },
+                    { en: "While", pt: "Um tempo", others: "período, enquanto, instante", context: "Listen for a while" },
+                    { en: "Young", pt: "Jovem", others: "novo, imaturo, moço", context: "This young boy" },
+                    { en: "Stranger", pt: "Estranho", others: "desconhecido, forasteiro", context: "A stranger to my eyes" },
+                    { en: "Felt", pt: "Senti", others: "percebi, tateei", context: "I felt all flushed with fever" },
+                    { en: "Flushed", pt: "Corada", others: "ruborizada, avermelhada", context: "I felt all flushed with fever" },
+                    { en: "Fever", pt: "Febre", others: "agitação, entusiasmo", context: "Flushed with fever" },
+                    { en: "Embarrassed", pt: "Envergonhada", others: "constrangida, embaraçada", context: "Embarrassed by the crowd" },
+                    { en: "Crowd", pt: "Multidão", others: "povo, massa, aglomeração", context: "Embarrassed by the crowd" },
+                    { en: "Found", pt: "Encontrou", others: "achou, descobriu, fundou", context: "I felt he'd found my letters" },
+                    { en: "Loud", pt: "Alto", others: "em voz alta, barulhento, ruidoso", context: "Read each one out loud" },
+                    { en: "Prayed", pt: "Rezei", others: "orei, implorei, supliquei", context: "I prayed that he would finish" },
+                    { en: "Finish", pt: "Terminar", others: "acabar, concluir, finalizar", context: "He would finish" },
+                    { en: "Kept", pt: "Manteve", others: "guardou, continuou, preservou", context: "He just kept right on" },
+                    { en: "Despair", pt: "Desespero", others: "desesperança, angústia", context: "In all my dark despair" },
+                    { en: "Through", pt: "Através", others: "pelo, por meio de, direto", context: "Looked right through me" },
+                    { en: "Clear", pt: "Claro", others: "límpido, nítido, transparente", context: "Singing clear and strong" },
+                    { en: "Strong", pt: "Forte", others: "resistente, potente, intenso", context: "Singing clear and strong" }
+                ]
+            },
+            standup: {
+                title: "Stand Up",
+                words: [
+                    { en: "Walkin'", pt: "Andando", others: "caminhando, passeando", context: "I been walkin' with my face turned to the Sun" },
+                    { en: "Turned", pt: "Virada", others: "voltada, girada, transformada", context: "With my face turned to the Sun" },
+                    { en: "Weight", pt: "Peso", others: "fardo, carga, importância", context: "Weight on my shoulders" },
+                    { en: "Shoulders", pt: "Ombros", others: "suportar, acostamento", context: "Weight on my shoulders" },
+                    { en: "Bullet", pt: "Bala", others: "projetil, munição", context: "A bullet in my gun" },
+                    { en: "Run", pt: "Correr", others: "fugir, operar, administrar", context: "Just in case I have to run" },
+                    { en: "People", pt: "Povo", others: "gente, pessoas, cidadãos", context: "For my people" },
+                    { en: "Clouds", pt: "Nuvens", others: "nuvens de chuva, sombra", context: "While the clouds roll back" },
+                    { en: "Roll back", pt: "Recuarem", others: "retroceder, voltar, diminuir", context: "While the clouds roll back" },
+                    { en: "Stand up", pt: "Levantar", others: "ficar em pé, resistir", context: "That's when I'm gonna stand up" },
+                    { en: "River", pt: "Rio", others: "fluxo, correnteza", context: "Far across the river" },
+                    { en: "Freedom", pt: "Liberdade", others: "autonomia, independência", context: "Can you hear freedom calling?" },
+                    { en: "Answer", pt: "Responder", others: "atender, resposta, solução", context: "Calling me to answer" },
+                    { en: "Bones", pt: "Ossos", others: "essência, estrutura", context: "I can feel it in my bones" },
+                    { en: "Shine", pt: "Brilhar", others: "lustrar, reluzir", context: "Before the Sun begins to shine" },
+                    { en: "Towards", pt: "Em direção a", others: "para, rumo a", context: "Towards that separating line" },
+                    { en: "Muddy", pt: "Lameada", others: "turva, barrenta, confusa", context: "I'm wadin' through muddy waters" },
+                    { en: "Mind", pt: "Mente", others: "opinião, cuidado, intenção", context: "I got a made up mind" },
+                    { en: "Salvation", pt: "Salvação", others: "redenção, resgate", context: "On the way to salvation" },
+                    { en: "Strength", pt: "Força", others: "resistência, vigor, potência", context: "With the strength that I got" },
+                    { en: "Bend", pt: "Curva", others: "dobra, inclinação", context: "What's around the bend" },
+                    { en: "Alone", pt: "Sozinho", others: "solitário, apenas", context: "'cause I'm alone" },
+                    { en: "Fail", pt: "Falhar", others: "fracassar, reprovar, omitir", context: "And I just might fail" },
+                    { en: "Tried", pt: "Tentei", others: "experimentei, testei", context: "But Lord knows I tried" },
+                    { en: "Prepare", pt: "Preparar", others: "dispor, aprontar", context: "I go to prepare a place for you" }
+                ]
+            }
+        };
+
+        let currentSongKey = 'killing';
+        let deck = [];
+        let currentCard = null;
+        let isFlipped = false;
+        let isRevealed = false;
+
+        const cardEl = document.getElementById('flashcard');
+        const controlsEl = document.getElementById('controls');
+        const wordEnFrontEl = document.getElementById('word-en-front');
+        const wordEnBackEl = document.getElementById('word-en-back');
+        const wordPtEl = document.getElementById('word-pt');
+        const otherMeaningsEl = document.getElementById('other-meanings');
+        const revealBtn = document.getElementById('reveal-btn');
+        const translationData = document.getElementById('translation-data');
+        const contextEl = document.getElementById('context');
+        const titleEl = document.getElementById('music-title');
+        
+        const totalCountEl = document.getElementById('total-count');
+        const seenCountEl = document.getElementById('seen-count');
+        const masteryEl = document.getElementById('mastery');
+
+        function initDeck(key) {
+            currentSongKey = key;
+            const song = songData[key];
+            titleEl.innerText = `"${song.title}"`;
+            deck = song.words.map(word => ({ 
+                ...word, 
+                weight: 10, 
+                seen: false 
+            }));
+            updateStats();
+            nextCard(true);
+        }
+
+        function changeMusic() {
+            const selector = document.getElementById('music-selector');
+            initDeck(selector.value);
+        }
+
+        function updateStats() {
+            const seen = deck.filter(w => w.seen).length;
+            const mastered = deck.filter(w => w.seen && w.weight < 5).length;
+            totalCountEl.innerText = deck.length;
+            seenCountEl.innerText = seen;
+            masteryEl.innerText = Math.round((mastered / deck.length) * 100) + "%";
+        }
+
+        function handleCardClick(event) {
+            if (event.target.closest('button')) return;
+            if (isFlipped) return;
+            isFlipped = true;
+            cardEl.classList.add('card-flipped');
+            currentCard.seen = true;
+            updateStats();
+        }
+
+        function speak(event) {
+            if (event) event.stopPropagation();
+            if (!currentCard) return;
+            const utterance = new SpeechSynthesisUtterance(currentCard.en);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.85;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function revealTranslation() {
+            isRevealed = true;
+            revealBtn.classList.add('hidden');
+            translationData.classList.remove('hidden');
+            controlsEl.classList.remove('opacity-0', 'pointer-events-none');
+        }
+
+        function nextCard(immediate = false) {
+            isFlipped = false;
+            isRevealed = false;
+            cardEl.classList.remove('card-flipped');
+            controlsEl.classList.add('opacity-0', 'pointer-events-none');
+            
+            const loadNext = () => {
+                translationData.classList.add('hidden');
+                revealBtn.classList.remove('hidden');
+                
+                let next;
+                do {
+                    const totalWeight = deck.reduce((s, c) => s + c.weight, 0);
+                    let r = Math.random() * totalWeight;
+                    for (let c of deck) {
+                        if (r < c.weight) { next = c; break; }
+                        r -= c.weight;
+                    }
+                } while (next === currentCard && deck.length > 1);
+
+                currentCard = next;
+                wordEnFrontEl.innerText = currentCard.en;
+                wordEnBackEl.innerText = currentCard.en;
+                wordPtEl.innerText = currentCard.pt;
+                otherMeaningsEl.innerText = currentCard.others || '';
+                contextEl.innerText = `"${currentCard.context}"`;
+            };
+
+            if (immediate) loadNext();
+            else setTimeout(loadNext, 300);
+        }
+
+        function rate(difficulty) {
+            if (difficulty === 'easy') currentCard.weight = Math.max(1, currentCard.weight - 5);
+            else if (difficulty === 'medium') currentCard.weight = Math.max(5, currentCard.weight - 2);
+            else currentCard.weight += 10;
+            nextCard();
+            updateStats();
+        }
+
+        window.onload = () => {
+            initDeck('killing');
+        };
+    </script>
+</body>
+</html>
