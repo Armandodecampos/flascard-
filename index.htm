@@ -31,8 +31,8 @@
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            border-radius: 1.5rem;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+            border-radius: 2rem;
+            box-shadow: 0 25px 30px -5px rgba(0, 0, 0, 0.3);
             padding: 1.5rem;
         }
         
@@ -42,118 +42,126 @@
         }
         
         @media (max-height: 700px) {
-            .perspective { height: 65vh; }
-            h1 { font-size: 1.25rem; }
+            .perspective { height: 70vh; }
+            h1 { font-size: 1.5rem; }
         }
 
         .speaker-btn {
-            padding: 12px;
+            padding: 16px;
             border-radius: 50%;
-            transition: background-color 0.2s;
+            transition: transform 0.2s, background-color 0.2s;
         }
         
         .speaker-btn:active {
             background-color: rgba(79, 70, 229, 0.1);
+            transform: scale(1.1);
         }
 
         select {
             appearance: none;
             background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
             background-repeat: no-repeat;
-            background-position: right 0.7rem center;
-            background-size: 1em;
+            background-position: right 1rem center;
+            background-size: 1.2em;
         }
+
+        /* Classes de utilidade para tamanhos dinâmicos */
+        .font-dynamic-lg { font-size: 3rem; } /* text-5xl */
+        .font-dynamic-md { font-size: 2.25rem; } /* text-4xl */
+        .font-dynamic-sm { font-size: 1.875rem; } /* text-3xl */
     </style>
 </head>
 <body class="p-4">
 
     <div class="w-full max-w-sm mx-auto flex flex-col">
         <!-- Music Selector -->
-        <div class="mb-4">
-            <label class="text-[10px] text-white/60 uppercase font-bold tracking-widest ml-1 mb-1 block">Selecionar Música</label>
-            <select id="music-selector" onchange="changeMusic()" class="w-full bg-white/20 border border-white/30 text-white text-sm rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-white/50 transition-all font-medium">
-                <option value="killing" class="text-gray-800">Killing Me Softly - Roberta Flack</option>
-                <option value="standup" class="text-gray-800">Stand Up - Cynthia Erivo</option>
+        <div class="mb-6">
+            <label class="text-[12px] text-white/80 uppercase font-black tracking-widest ml-1 mb-2 block">Selecionar Música</label>
+            <select id="music-selector" onchange="changeMusic()" class="w-full bg-white/20 border-2 border-white/30 text-white text-base rounded-2xl px-5 py-4 outline-none focus:ring-4 focus:ring-white/20 transition-all font-bold">
+                <option value="killing" class="text-gray-900">Killing Me Softly - Roberta Flack</option>
+                <option value="standup" class="text-gray-900">Stand Up - Cynthia Erivo</option>
             </select>
         </div>
 
         <!-- Header -->
-        <div class="text-center mb-4 text-white">
-            <h1 id="music-title" class="text-xl font-bold italic opacity-90">"Killing Me Softly"</h1>
+        <div class="text-center mb-6 text-white">
+            <h1 id="music-title" class="text-2xl font-black italic">"Killing Me Softly"</h1>
         </div>
 
         <!-- Stats -->
-        <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-4 mb-6 flex justify-between text-white text-xs border border-white/20">
+        <div class="bg-white/10 backdrop-blur-xl rounded-3xl p-5 mb-8 flex justify-between text-white border-2 border-white/20 shadow-xl">
             <div class="text-center">
-                <span class="block opacity-60">Total</span>
-                <span id="total-count" class="font-bold text-lg">0</span>
+                <span class="block opacity-70 text-xs font-bold uppercase tracking-tighter">Total</span>
+                <span id="total-count" class="font-black text-2xl">0</span>
             </div>
-            <div class="text-center border-x border-white/10 px-6">
-                <span class="block opacity-60">Vistas</span>
-                <span id="seen-count" class="font-bold text-lg">0</span>
+            <div class="text-center border-x-2 border-white/10 px-8">
+                <span class="block opacity-70 text-xs font-bold uppercase tracking-tighter">Vistas</span>
+                <span id="seen-count" class="font-black text-2xl text-yellow-300">0</span>
             </div>
             <div class="text-center">
-                <span class="block opacity-60">Domínio</span>
-                <span id="mastery" class="font-bold text-lg">0%</span>
+                <span class="block opacity-70 text-xs font-bold uppercase tracking-tighter">Domínio</span>
+                <span id="mastery" class="font-black text-2xl text-green-400">0%</span>
             </div>
         </div>
 
         <!-- Flashcard Container -->
-        <div class="perspective h-[380px] w-full mb-8">
+        <div class="perspective h-[420px] w-full mb-10">
             <div id="flashcard" class="card-inner relative w-full h-full">
                 
                 <!-- Frente -->
-                <div class="card-front bg-white border-b-8 border-indigo-500 cursor-pointer" onclick="handleCardClick(event)">
-                    <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-[0.2em] mb-4">Inglês</span>
-                    <div class="flex flex-col items-center gap-4">
-                        <h2 id="word-en-front" class="text-4xl font-black text-gray-800 tracking-tight text-center">...</h2>
-                        <button onclick="speak(event)" class="speaker-btn text-indigo-400" aria-label="Ouvir">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                <div class="card-front bg-white border-b-[12px] border-indigo-600 cursor-pointer" onclick="handleCardClick(event)">
+                    <span class="text-[12px] font-black text-indigo-500 uppercase tracking-[0.3em] mb-6">Inglês</span>
+                    <div class="flex flex-col items-center gap-6 w-full">
+                        <!-- ID alterado para aplicar tamanho dinâmico -->
+                        <h2 id="word-en-front" class="font-black text-gray-900 tracking-tighter text-center leading-tight break-words w-full">...</h2>
+                        <button onclick="speak(event)" class="speaker-btn text-indigo-600 bg-indigo-50 shadow-md" aria-label="Ouvir">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
                         </button>
                     </div>
-                    <p class="text-gray-300 mt-auto text-xs animate-pulse">Toque para girar</p>
+                    <p class="text-gray-400 mt-auto text-sm font-bold animate-pulse uppercase tracking-widest">Toque para girar</p>
                 </div>
 
                 <!-- Verso -->
-                <div class="card-back bg-indigo-50 border-b-8 border-green-500">
-                    <div class="flex items-center gap-2 mb-4 opacity-50">
-                        <span id="word-en-back" class="text-sm font-bold text-indigo-900 uppercase">...</span>
-                        <button onclick="speak(event)" class="p-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                <div class="card-back bg-indigo-50 border-b-[12px] border-green-600">
+                    <div class="flex items-center gap-3 mb-6 opacity-60">
+                        <span id="word-en-back" class="text-lg font-black text-indigo-950 uppercase tracking-wider">...</span>
+                        <button onclick="speak(event)" class="p-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
                         </button>
                     </div>
                     
                     <div id="translation-container" class="flex-1 flex flex-col items-center justify-center w-full">
-                        <button id="reveal-btn" onclick="revealTranslation()" class="bg-indigo-600 text-white px-8 py-4 rounded-2xl text-sm font-black shadow-lg shadow-indigo-200 active:scale-95 transition-transform">
+                        <button id="reveal-btn" onclick="revealTranslation()" class="bg-indigo-700 text-white px-10 py-5 rounded-3xl text-lg font-black shadow-2xl shadow-indigo-300 active:scale-90 transition-transform uppercase tracking-widest">
                             VER TRADUÇÃO
                         </button>
-                        <div id="translation-data" class="hidden text-center">
-                            <h2 id="word-pt" class="text-3xl font-black text-gray-800 italic mb-2">...</h2>
-                            <p id="other-meanings" class="text-indigo-600 text-xs font-medium px-4 leading-relaxed"></p>
+                        <div id="translation-data" class="hidden text-center w-full">
+                            <!-- ID alterado para aplicar tamanho dinâmico igual à frente -->
+                            <h2 id="word-pt" class="font-black text-gray-900 italic mb-4 leading-none break-words w-full">...</h2>
+                            <p id="other-meanings" class="text-indigo-700 text-lg font-bold px-4 leading-snug"></p>
                         </div>
                     </div>
 
-                    <div class="w-full mt-6 pt-4 border-t border-indigo-100">
-                        <p id="context" class="text-gray-400 text-sm italic leading-snug"></p>
+                    <div class="w-full mt-8 pt-6 border-t-2 border-indigo-200">
+                        <p id="context" class="text-gray-600 text-lg font-medium italic leading-relaxed text-center"></p>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Controls -->
-        <div id="controls" class="space-y-4 opacity-0 transition-opacity duration-300 pointer-events-none pb-8">
-            <div class="grid grid-cols-3 gap-3">
-                <button onclick="rate('hard')" class="bg-white/10 border border-red-400/50 text-red-100 py-4 rounded-2xl font-bold active:bg-red-500/20 transition-colors text-sm">
+        <div id="controls" class="space-y-5 opacity-0 transition-opacity duration-300 pointer-events-none pb-12">
+            <div class="grid grid-cols-3 gap-4">
+                <button onclick="rate('hard')" class="bg-red-600 text-white py-5 rounded-3xl font-black active:scale-95 transition-transform text-base shadow-xl uppercase">
                     Difícil
                 </button>
-                <button onclick="rate('medium')" class="bg-white/10 border border-yellow-400/50 text-yellow-100 py-4 rounded-2xl font-bold active:bg-yellow-500/20 transition-colors text-sm">
+                <button onclick="rate('medium')" class="bg-yellow-400 text-gray-900 py-5 rounded-3xl font-black active:scale-95 transition-transform text-base shadow-xl uppercase">
                     Médio
                 </button>
-                <button onclick="rate('easy')" class="bg-white/10 border border-green-400/50 text-green-100 py-4 rounded-2xl font-bold active:bg-green-500/20 transition-colors text-sm">
+                <button onclick="rate('easy')" class="bg-green-600 text-white py-5 rounded-3xl font-black active:scale-95 transition-transform text-base shadow-xl uppercase">
                     Fácil
                 </button>
             </div>
-            <button onclick="nextCard()" class="w-full bg-white text-indigo-700 py-4 rounded-2xl font-black shadow-xl active:scale-[0.98] transition-transform">
+            <button onclick="nextCard()" class="w-full bg-white text-indigo-800 py-6 rounded-3xl font-black text-xl shadow-2xl active:scale-[0.96] transition-transform uppercase tracking-tighter">
                 PRÓXIMA PALAVRA
             </button>
         </div>
@@ -299,6 +307,19 @@
             controlsEl.classList.remove('opacity-0', 'pointer-events-none');
         }
 
+        // Função para calcular o tamanho da fonte baseado no comprimento da palavra
+        function applyDynamicFontSize(text, element) {
+            element.classList.remove('font-dynamic-lg', 'font-dynamic-md', 'font-dynamic-sm');
+            
+            if (text.length > 10) {
+                element.classList.add('font-dynamic-sm');
+            } else if (text.length > 7) {
+                element.classList.add('font-dynamic-md');
+            } else {
+                element.classList.add('font-dynamic-lg');
+            }
+        }
+
         function nextCard(immediate = false) {
             isFlipped = false;
             isRevealed = false;
@@ -320,9 +341,20 @@
                 } while (next === currentCard && deck.length > 1);
 
                 currentCard = next;
+                
+                // Aplicar texto
                 wordEnFrontEl.innerText = currentCard.en;
                 wordEnBackEl.innerText = currentCard.en;
                 wordPtEl.innerText = currentCard.pt;
+                
+                // Aplicar tamanhos dinâmicos baseados no comprimento da palavra
+                // Comparamos o Inglês e Português e usamos o menor tamanho (maior restrição) para ambos
+                const maxLength = Math.max(currentCard.en.length, currentCard.pt.length);
+                const dummyText = "X".repeat(maxLength);
+                
+                applyDynamicFontSize(dummyText, wordEnFrontEl);
+                applyDynamicFontSize(dummyText, wordPtEl);
+
                 otherMeaningsEl.innerText = currentCard.others || '';
                 contextEl.innerText = `"${currentCard.context}"`;
             };
